@@ -33,12 +33,13 @@ export default {
   }
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .testshow {
   padding: 10px 10px;
   background-color: aqua;
 }
+
 .el-collapse-item__arrow.is-active {
-  transform: rotate(-180deg) !important;
+  transform: rotate(-180deg);
 }
 </style>
