@@ -9,7 +9,7 @@
       <!-- 通知类型 -->
       <h4 class="notify-type-text">來訪通知：</h4>
       <p class="email-message" v-html="email && email.message"></p>
-      <!-- <regist-previewer v-if="data.attachment" :data="visitorRegistTemplate"></regist-previewer> -->
+      <regist-previewer v-if="dataInfo" :dataInfo="dataInfo"></regist-previewer>
       <!-- 请勿回复提示 -->
       <p class="email-tips">*注意: 此封信由系統發送，請勿回覆此 Email</p>
     </div>
@@ -23,7 +23,7 @@
 </template>
 <script>
 // import { emailVariables } from './variables'
-// import RegistPreviewer from "./regist-previewer";
+import RegistPreviewer from "./regist-previewer";
 import hb from "handlebars";
 
 export default {
@@ -165,11 +165,32 @@ export default {
     this.email.message = this.convertTemplate(this.email.message, userData);
   },
   components: {
-    // RegistPreviewer,
+    RegistPreviewer,
   },
   props: {},
   data() {
     return {
+      dataInfo: {
+        attachment: [
+          {
+            attachment: 1,
+            visitorName: "guest",
+            respondentName: "Zevi",
+            reason: "aa",
+            reasonNote: "bb",
+          },
+          {
+            characterId: 1,
+            characterName: "cc",
+            characterNote: "dd",
+          },
+        ],
+        health: {
+          body: ["none"],
+          digestiveTrack: ["a", "b"],
+          respiratoryTrack: ["none"],
+        },
+      },
       scenario: {},
       notifyTypeOpts: [
         "noMask",
@@ -181,23 +202,23 @@ export default {
       langCode: "zh-TW",
       email: {},
       vvisible: true,
-      visitorRegistTemplate: {
-        ver: "1",
-        visitorInfo: {
-          visitorName: "email.template_person_name",
-          intervieweeName: "email.template_person_name_2",
-          purposeOfVisit: "1",
-          purposeRemark: "",
-          visitorStatus: "2",
-          statusRemark: "",
-        },
-        healthQuestionnaire: {
-          systemicSymptoms: ["0"],
-          digestiveSymptoms: ["0"],
-          respiratorySymptoms: ["0"],
-        },
-        createdAt: "2020-12-18T07:03:47.417Z",
-      },
+      //   visitorRegistTemplate: {
+      //     ver: "1",
+      //     visitorInfo: {
+      //       visitorName: "email.template_person_name",
+      //       intervieweeName: "email.template_person_name_2",
+      //       purposeOfVisit: "1",
+      //       purposeRemark: "",
+      //       visitorStatus: "2",
+      //       statusRemark: "",
+      //     },
+      //     healthQuestionnaire: {
+      //       systemicSymptoms: ["0"],
+      //       digestiveSymptoms: ["0"],
+      //       respiratorySymptoms: ["0"],
+      //     },
+      //     createdAt: "2020-12-18T07:03:47.417Z",
+      //   },
     };
   },
   methods: {
