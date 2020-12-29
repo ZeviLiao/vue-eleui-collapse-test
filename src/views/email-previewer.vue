@@ -171,20 +171,17 @@ export default {
   data() {
     return {
       dataInfo: {
-        attachment: [
-          {
-            attachment: 1,
-            visitorName: "guest",
-            respondentName: "Zevi",
-            reason: "aa",
-            reasonNote: "bb",
-          },
-          {
-            characterId: 1,
-            characterName: "cc",
-            characterNote: "dd",
-          },
-        ],
+        attachment: {
+          // attachment: 1,
+          visitorName: "guest",
+          respondentName: "Zevi",
+          reason: "aa",
+          reasonNote: "bb",
+          // characterId: 1,
+          characterName: "cc",
+          characterNote: "dd",
+        },
+
         health: {
           body: ["none"],
           digestiveTrack: ["a", "b"],
