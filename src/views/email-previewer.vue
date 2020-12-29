@@ -1,56 +1,186 @@
 <template>
-  <el-dialog
-    :visible="visible"
-    :title="'email.notify_preview'"
-    :close-on-press-escape="false"
-    :close-on-click-modal="false"
-    :lock-scroll="true"
-    :append-to-body="true"
-    custom-class="notify-email-previewer"
-    width="800px"
-    @close="close"
-  >
-    <div class="email-container">
-      <!-- 邮件标题 -->
-      <h3>{{'email.text_title'}}</h3>
-      <p class="email-title" v-html="replaceText(data.title)"></p>
-      <h3 style="margin-top: 24px;">{{'email.text_content'}}</h3>
-      <!-- 邮件正文 -->
-      <div class="email-content">
-        <!-- 通知类型 -->
-        <h4 class="notify-type-text">{{data.formTitle}}:</h4>
-        <p class="email-message" v-html="replaceText(data.message)"></p>
-        <regist-previewer v-if="data.attachment" :data="visitorRegistTemplate"></regist-previewer>
-        <!-- 请勿回复提示 -->
-        <p class="email-tips">{{'email.content_tips_not_reply'}}</p>
-      </div>
-      <!-- 页脚 -->
-      <div class="email-footer">
-        <div class="nuwa-email-logo">
-          <img :src="`/public/static/images/mail-logo.png`" width="139" height="10" alt />
-        </div>
+  <div class="email-container">
+    <!-- 邮件标题 -->
+    <h3>標題主旨：</h3>
+    <p class="email-title" v-html="email && email.title"></p>
+    <h3 style="margin-top: 24px;">內文：</h3>
+    <!-- 邮件正文 -->
+    <div class="email-content">
+      <!-- 通知类型 -->
+      <h4 class="notify-type-text">來訪通知：</h4>
+      <p class="email-message" v-html="email && email.message"></p>
+      <!-- <regist-previewer v-if="data.attachment" :data="visitorRegistTemplate"></regist-previewer> -->
+      <!-- 请勿回复提示 -->
+      <p class="email-tips">*注意: 此封信由系統發送，請勿回覆此 Email</p>
+    </div>
+    <!-- 页脚 -->
+    <div class="email-footer">
+      <div class="nuwa-email-logo">
+        <img :src="`/public/static/images/mail-logo.png`" width="139" height="10" alt />
       </div>
     </div>
-  </el-dialog>
+  </div>
 </template>
 <script>
 // import { emailVariables } from './variables'
-import RegistPreviewer from "./regist-previewer";
+// import RegistPreviewer from "./regist-previewer";
+import hb from "handlebars";
+
 export default {
+  mounted() {
+    this.scenario = {
+      name: "xxx", //場景名稱
+      receptionMessage: "口罩不離身，隨時勤洗手，病毒遠離你。", //接待語
+      temperature: {
+        //溫度設定
+        mode: 1, //溫度測定模式，1-複測模式（紅外線＋熱顯像測溫），2-精準模式（紅外線測溫），3-快篩模式（熱顯像測溫）
+        unit: "c", //溫度單位， c-攝氏，f-華氏
+        value: 37.5, //示警溫度值
+        reTestMessage: "體溫有點高，不舒服的話要去看醫生，多喝水、多休息。", //溫度測試完畢結語
+      },
+      devices: [
+        //關連設備
+        {
+          sn: "xxx",
+        },
+      ],
+      people: [
+        {
+          //關連人群
+          personId: "9gss25bQ9zR1L1LW", //人員Id
+        },
+      ],
+      maintainers: [
+        {
+          //維護者名單
+          name: "lzk", //維護者名稱
+          email: "luo.zhikai@nuwarobotics.com", //維護者郵箱
+          isDefault: true, //是否是默認存在的，默認存在的維護者不可刪除
+          characters: [
+            {
+              //角色設定，陌生人為默認設定
+              i18n: [
+                //用於顯示維護者標題的-頁面沒有可設置的地方，只能系統去判斷取名
+                { langCode: "zh-TW", name: "維護者一號" },
+              ],
+              characterId: "xxoo", //角色id
+              characterType: "stranger", //角色類型，stranger-陌生人，character-已設定的角色
+              characterName: "陌生人", //角色名稱
+              //需要通知的事件，normalTemperature-溫度正常，abnormalTemperature-溫度異常, noMask-沒戴口罩, visiting-來訪
+              notifies: ["abnormalTemperature", "noMask", "visiting"],
+            },
+            {
+              //角色設定，根據已設定角色設置
+              characterId: "xxpp", //角色id
+              characterType: "character", //角色類型，stranger-陌生人，character-已設定的角色
+              characterName: "老闆娘", //角色名稱
+              notifies: ["abnormalTemperature", "noMask", "visiting"],
+            },
+          ],
+        },
+      ],
+      emails: [
+        //郵件設定
+
+        //通知類型, noMask-沒戴口罩， abnormalTemperature-溫度異常， normalTemperature-溫度正常， visiting-來訪
+        {
+          notifyType: "noMask",
+          i18n: [
+            {
+              //用於顯示郵件標題的
+              langCode: "zh-TW",
+              name: "陌生人來訪通知",
+            },
+          ],
+          title: "【女媧接待系統】 -  %character %name 來訪通知 %time", //郵件內容標題
+          message: "%character %name 來訪，詳細目的如下附件：", //郵件內容正文
+          attachment: "xx", //附件的表格id
+        },
+        {
+          //溫度正常通知
+          notifyType: "normalTemperature",
+          i18n: [
+            {
+              langCode: "zh-TW",
+              name: "體溫異常通知",
+            },
+          ],
+          title: "【女媧接待系統】 -  %time %name 體溫異常通知",
+          message:
+            "體溫異常通知\n%time %name%salutation%\n體溫：%temperature°C\n%noFaceMask',",
+          attachment: null,
+        },
+        {
+          //溫度異常通知
+          notifyType: "abnormalTemperature",
+          i18n: [
+            {
+              langCode: "zh-TW",
+              name: "體溫異常通知",
+            },
+          ],
+          title: "【女媧接待系統】 -  %time %name 體溫異常通知",
+          message:
+            "體溫異常通知\n%time %name%salutation%\n體溫：%temperature°C\n%noFaceMask',",
+          attachment: null,
+        },
+        {
+          //角色訪問通知
+          notifyType: "visiting",
+
+          i18n: [
+            {
+              langCode: "zh-TW",
+              name: "體溫異常通知",
+            },
+          ],
+          title: "【女媧接待系統】 -  %time %name 體溫異常通知",
+          message:
+            "體溫異常通知\n%time %name%salutation%\n體溫：%temperature°C\n%noFaceMask',",
+          attachments: [
+            {
+              notifyType: "stranger",
+              attachment: "xxx",
+            },
+            {
+              notifyType: "character",
+              characterId: "xxx", //角色的id
+              attachment: "xxx",
+            },
+          ],
+        },
+      ],
+    };
+    this.email = this.scenario.emails.find(
+      (o) => o.notifyType === this.notifyType
+    );
+    let userData = {
+      time: "2020/1/1 6:23 pm",
+      name: "Zevi",
+      salutation: "good",
+      temperature: "36.5",
+      noFaceMask: true,
+    };
+    this.email.title = this.convertTemplate(this.email.title, userData);
+    this.email.message = this.convertTemplate(this.email.message, userData);
+  },
   components: {
-    RegistPreviewer,
+    // RegistPreviewer,
   },
-  props: {
-    visible: Boolean,
-  },
+  props: {},
   data() {
     return {
-      data: {
-        title: "title",
-        formTitle: "formTitle",
-        message: "message",
-        attachment: false,
-      },
+      scenario: {},
+      notifyTypeOpts: [
+        "noMask",
+        "abnormalTemperature",
+        "normalTemperature",
+        "visiting",
+      ],
+      notifyType: "visiting",
+      langCode: "zh-TW",
+      email: {},
+      vvisible: true,
       visitorRegistTemplate: {
         ver: "1",
         visitorInfo: {
@@ -71,6 +201,25 @@ export default {
     };
   },
   methods: {
+    convertTemplate(text, userData) {
+      let arrVars = Object.keys(userData);
+      const buildRegs = (arr) => {
+        return arr.map((v) => {
+          return { reg: `%(${v})`, value: "{{$1}}" };
+        });
+      };
+      let variables = buildRegs(arrVars);
+      variables.push({ reg: "\n", value: "<br/>" }); // enter
+
+      variables.forEach((item) => {
+        const regex = new RegExp(item.reg, "gm");
+        text = text.replace(regex, item.value);
+      });
+
+      var template = hb.compile(text);
+      return template(userData);
+    },
+
     replaceText(text) {
       // const variables = emailVariables(this.data.notifyType)
       // variables.forEach(item => {
