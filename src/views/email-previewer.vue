@@ -256,11 +256,8 @@ export default {
       });
 
       let obj;
-
       if ("noFaceMask" in userData) {
-        obj = Object.assign({...userData}, {
-          noFaceMask: this.maskText(userData.noFaceMask),
-        });
+        obj = { ...userData, noFaceMask: this.maskText(userData.noFaceMask) };
       }
 
       var template = hb.compile(text);
