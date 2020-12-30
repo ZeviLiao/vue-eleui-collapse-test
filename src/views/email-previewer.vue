@@ -1,5 +1,13 @@
 <template>
   <div class="email-container">
+    <el-select v-model="notifyType" placeholder="Select" @change="selectChanged">
+      <el-option
+        v-for="item in notifyTypeOpts"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
+      ></el-option>
+    </el-select>
     <!-- 邮件标题 -->
     <h3>標題主旨：</h3>
     <p class="email-title" v-html="email && email.title"></p>
@@ -28,144 +36,7 @@ import hb from "handlebars";
 
 export default {
   mounted() {
-    this.scenario = {
-      name: "xxx", //場景名稱
-      receptionMessage: "口罩不離身，隨時勤洗手，病毒遠離你。", //接待語
-      temperature: {
-        //溫度設定
-        mode: 1, //溫度測定模式，1-複測模式（紅外線＋熱顯像測溫），2-精準模式（紅外線測溫），3-快篩模式（熱顯像測溫）
-        unit: "c", //溫度單位， c-攝氏，f-華氏
-        value: 37.5, //示警溫度值
-        reTestMessage: "體溫有點高，不舒服的話要去看醫生，多喝水、多休息。", //溫度測試完畢結語
-      },
-      devices: [
-        //關連設備
-        {
-          sn: "xxx",
-        },
-      ],
-      people: [
-        {
-          //關連人群
-          personId: "9gss25bQ9zR1L1LW", //人員Id
-        },
-      ],
-      maintainers: [
-        {
-          //維護者名單
-          name: "lzk", //維護者名稱
-          email: "luo.zhikai@nuwarobotics.com", //維護者郵箱
-          isDefault: true, //是否是默認存在的，默認存在的維護者不可刪除
-          characters: [
-            {
-              //角色設定，陌生人為默認設定
-              i18n: [
-                //用於顯示維護者標題的-頁面沒有可設置的地方，只能系統去判斷取名
-                { langCode: "zh-TW", name: "維護者一號" },
-              ],
-              characterId: "xxoo", //角色id
-              characterType: "stranger", //角色類型，stranger-陌生人，character-已設定的角色
-              characterName: "陌生人", //角色名稱
-              //需要通知的事件，normalTemperature-溫度正常，abnormalTemperature-溫度異常, noMask-沒戴口罩, visiting-來訪
-              notifies: ["abnormalTemperature", "noMask", "visiting"],
-            },
-            {
-              //角色設定，根據已設定角色設置
-              characterId: "xxpp", //角色id
-              characterType: "character", //角色類型，stranger-陌生人，character-已設定的角色
-              characterName: "老闆娘", //角色名稱
-              notifies: ["abnormalTemperature", "noMask", "visiting"],
-            },
-          ],
-        },
-      ],
-      emails: [
-        //郵件設定
-
-        //通知類型, noMask-沒戴口罩， abnormalTemperature-溫度異常， normalTemperature-溫度正常， visiting-來訪
-        {
-          notifyType: "noMask",
-          i18n: [
-            {
-              //用於顯示郵件標題的
-              langCode: "zh-TW",
-              name: "沒戴口罩通知",
-            },
-          ],
-          title: "【女媧接待系統】- %character %name 沒戴口罩通知 %time", //郵件內容標題
-          message: "沒戴口罩通知：\n%time %name%salutation\n%noFaceMask載口罩", //郵件內容正文
-          attachment: null, //附件的表格id
-        },
-        {
-          //溫度正常通知
-          notifyType: "normalTemperature",
-          i18n: [
-            {
-              langCode: "zh-TW",
-              name: "體溫正常通知",
-            },
-          ],
-          title: "【女媧接待系統】 -  %time %name 體溫正常通知",
-          message:
-            "體溫正常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
-          attachment: null,
-        },
-        {
-          //溫度異常通知
-          notifyType: "abnormalTemperature",
-          i18n: [
-            {
-              langCode: "zh-TW",
-              name: "體溫異常通知",
-            },
-          ],
-          title: "【女媧接待系統】 -  %time %name 體溫異常通知",
-          message:
-            "體溫異常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
-          attachment: null,
-        },
-        {
-          //角色訪問通知
-          notifyType: "visiting",
-
-          i18n: [
-            {
-              langCode: "zh-TW",
-              name: "來訪通知",
-            },
-          ],
-          title: "【女媧接待系統】- %character %name 來訪通知 %time",
-          message:
-            "來訪通知： \n%character %name 來訪，詳細目的如下附件：",
-          attachments: [
-            {
-              notifyType: "stranger",
-              attachment: "xxx",
-            },
-            {
-              notifyType: "character",
-              characterId: "xxx", //角色的id
-              attachment: "xxx",
-            },
-          ],
-        },
-      ],
-    };
-    this.email = this.scenario.emails.find(
-      (o) => o.notifyType === this.notifyType
-    );
-
-    let userData = {
-      character: "陌生人",
-      name: "Zevi",
-      time: "2020/1/1 6:23 pm",
-      salutation: "先生",
-      temperature: 36.5,
-      noFaceMask: true,
-    };
-
-    this.email.title = this.convertTemplate(this.email.title, userData);
-    this.email.message = this.convertTemplate(this.email.message, userData);
+    this.selectChanged();
   },
   components: {
     RegistPreviewer,
@@ -191,17 +62,139 @@ export default {
           respiratoryTrack: ["none"],
         },
       },
-      scenario: {},
+      scenario: {
+        name: "xxx", //場景名稱
+        receptionMessage: "口罩不離身，隨時勤洗手，病毒遠離你。", //接待語
+        temperature: {
+          //溫度設定
+          mode: 1, //溫度測定模式，1-複測模式（紅外線＋熱顯像測溫），2-精準模式（紅外線測溫），3-快篩模式（熱顯像測溫）
+          unit: "c", //溫度單位， c-攝氏，f-華氏
+          value: 37.5, //示警溫度值
+          reTestMessage: "體溫有點高，不舒服的話要去看醫生，多喝水、多休息。", //溫度測試完畢結語
+        },
+        devices: [
+          //關連設備
+          {
+            sn: "xxx",
+          },
+        ],
+        people: [
+          {
+            //關連人群
+            personId: "9gss25bQ9zR1L1LW", //人員Id
+          },
+        ],
+        maintainers: [
+          {
+            //維護者名單
+            name: "lzk", //維護者名稱
+            email: "luo.zhikai@nuwarobotics.com", //維護者郵箱
+            isDefault: true, //是否是默認存在的，默認存在的維護者不可刪除
+            characters: [
+              {
+                //角色設定，陌生人為默認設定
+                i18n: [
+                  //用於顯示維護者標題的-頁面沒有可設置的地方，只能系統去判斷取名
+                  { langCode: "zh-TW", name: "維護者一號" },
+                ],
+                characterId: "xxoo", //角色id
+                characterType: "stranger", //角色類型，stranger-陌生人，character-已設定的角色
+                characterName: "陌生人", //角色名稱
+                //需要通知的事件，normalTemperature-溫度正常，abnormalTemperature-溫度異常, noMask-沒戴口罩, visiting-來訪
+                notifies: ["abnormalTemperature", "noMask", "visiting"],
+              },
+              {
+                //角色設定，根據已設定角色設置
+                characterId: "xxpp", //角色id
+                characterType: "character", //角色類型，stranger-陌生人，character-已設定的角色
+                characterName: "老闆娘", //角色名稱
+                notifies: ["abnormalTemperature", "noMask", "visiting"],
+              },
+            ],
+          },
+        ],
+        emails: [
+          //郵件設定
+
+          //通知類型, noMask-沒戴口罩， abnormalTemperature-溫度異常， normalTemperature-溫度正常， visiting-來訪
+          {
+            notifyType: "noMask",
+            i18n: [
+              {
+                //用於顯示郵件標題的
+                langCode: "zh-TW",
+                name: "沒戴口罩通知",
+              },
+            ],
+            title: "【女媧接待系統】- %character %name 沒戴口罩通知 %time", //郵件內容標題
+            message:
+              "沒戴口罩通知：\n%time %name%salutation\n%noFaceMask載口罩", //郵件內容正文
+            attachment: null, //附件的表格id
+          },
+          {
+            //溫度正常通知
+            notifyType: "normalTemperature",
+            i18n: [
+              {
+                langCode: "zh-TW",
+                name: "體溫正常通知",
+              },
+            ],
+            title: "【女媧接待系統】 -  %time %name 體溫正常通知",
+            message:
+              "體溫正常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
+            attachment: null,
+          },
+          {
+            //溫度異常通知
+            notifyType: "abnormalTemperature",
+            i18n: [
+              {
+                langCode: "zh-TW",
+                name: "體溫異常通知",
+              },
+            ],
+            title: "【女媧接待系統】 -  %time %name 體溫異常通知",
+            message:
+              "體溫異常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
+            attachment: null,
+          },
+          {
+            //角色訪問通知
+            notifyType: "visiting",
+
+            i18n: [
+              {
+                langCode: "zh-TW",
+                name: "來訪通知",
+              },
+            ],
+            title: "【女媧接待系統】- %character %name 來訪通知 %time",
+            message: "來訪通知： \n%character %name 來訪，詳細目的如下附件：",
+            attachments: [
+              {
+                notifyType: "stranger",
+                attachment: "xxx",
+              },
+              {
+                notifyType: "character",
+                characterId: "xxx", //角色的id
+                attachment: "xxx",
+              },
+            ],
+          },
+        ],
+      },
       notifyTypeOpts: [
-        "noMask",
-        "abnormalTemperature",
-        "normalTemperature",
-        "visiting",
+        { label: "noMask", value: "noMask" },
+        { label: "abnormalTemperature", value: "abnormalTemperature" },
+        { label: "normalTemperature", value: "normalTemperature" },
+        { label: "visiting", value: "visiting" },
       ],
       notifyType: "visiting",
       langCode: "zh-TW",
       email: {},
-      vvisible: true,
+      visible: true,
       //   visitorRegistTemplate: {
       //     ver: "1",
       //     visitorInfo: {
@@ -222,6 +215,22 @@ export default {
     };
   },
   methods: {
+    selectChanged() {
+      this.email = this.scenario.emails.find(
+        (o) => o.notifyType === this.notifyType
+      );
+      let userData = {
+        character: "陌生人",
+        name: "Zevi",
+        time: "2020/1/1 6:23 pm",
+        salutation: "先生",
+        temperature: 36.5,
+        noFaceMask: true,
+      };
+
+      this.email.title = this.convertTemplate(this.email.title, userData);
+      this.email.message = this.convertTemplate(this.email.message, userData);
+    },
     convertTemplate(text, userData) {
       let arrVars = Object.keys(userData);
       const buildRegs = (arr) => {
