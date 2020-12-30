@@ -9,7 +9,7 @@
       <!-- 通知类型 -->
       <h4 class="notify-type-text">來訪通知：</h4>
       <p class="email-message" v-html="email && email.message"></p>
-      <regist-previewer v-if="dataInfo" :dataInfo="dataInfo"></regist-previewer>
+      <regist-previewer v-if="false" :dataInfo="dataInfo"></regist-previewer>
       <!-- 请勿回复提示 -->
       <p class="email-tips">*注意: 此封信由系統發送，請勿回覆此 Email</p>
     </div>
@@ -89,12 +89,12 @@ export default {
             {
               //用於顯示郵件標題的
               langCode: "zh-TW",
-              name: "陌生人來訪通知",
+              name: "沒戴口罩通知",
             },
           ],
-          title: "【女媧接待系統】 -  %character %name 來訪通知 %time", //郵件內容標題
-          message: "%character %name 來訪，詳細目的如下附件：", //郵件內容正文
-          attachment: "xx", //附件的表格id
+          title: "【女媧接待系統】- %character %name 沒戴口罩通知 %time", //郵件內容標題
+          message: "沒戴口罩通知：\n%time %name%salutation\n%noFaceMask載口罩", //郵件內容正文
+          attachment: null, //附件的表格id
         },
         {
           //溫度正常通知
@@ -102,12 +102,12 @@ export default {
           i18n: [
             {
               langCode: "zh-TW",
-              name: "體溫異常通知",
+              name: "體溫正常通知",
             },
           ],
-          title: "【女媧接待系統】 -  %time %name 體溫異常通知",
+          title: "【女媧接待系統】 -  %time %name 體溫正常通知",
           message:
-            "體溫異常通知\n%time %name%salutation%\n體溫：%temperature°C\n%noFaceMask',",
+            "體溫正常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
           attachment: null,
         },
         {
@@ -121,7 +121,7 @@ export default {
           ],
           title: "【女媧接待系統】 -  %time %name 體溫異常通知",
           message:
-            "體溫異常通知\n%time %name%salutation%\n體溫：%temperature°C\n%noFaceMask',",
+            "體溫異常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
           attachment: null,
         },
         {
@@ -131,12 +131,12 @@ export default {
           i18n: [
             {
               langCode: "zh-TW",
-              name: "體溫異常通知",
+              name: "來訪通知",
             },
           ],
-          title: "【女媧接待系統】 -  %time %name 體溫異常通知",
+          title: "【女媧接待系統】- %character %name 來訪通知 %time",
           message:
-            "體溫異常通知\n%time %name%salutation%\n體溫：%temperature°C\n%noFaceMask',",
+            "來訪通知： \n%character %name 來訪，詳細目的如下附件：",
           attachments: [
             {
               notifyType: "stranger",
@@ -154,13 +154,16 @@ export default {
     this.email = this.scenario.emails.find(
       (o) => o.notifyType === this.notifyType
     );
+
     let userData = {
-      time: "2020/1/1 6:23 pm",
+      character: "陌生人",
       name: "Zevi",
-      salutation: "good",
-      temperature: "36.5",
+      time: "2020/1/1 6:23 pm",
+      salutation: "先生",
+      temperature: 36.5,
       noFaceMask: true,
     };
+
     this.email.title = this.convertTemplate(this.email.title, userData);
     this.email.message = this.convertTemplate(this.email.message, userData);
   },
