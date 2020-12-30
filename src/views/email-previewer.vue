@@ -15,9 +15,9 @@
     <!-- 邮件正文 -->
     <div class="email-content">
       <!-- 通知类型 -->
-      <h4 class="notify-type-text">來訪通知：</h4>
+      <!-- <h4 class="notify-type-text">{{email && email.i18n[0].name}}：</h4> -->
       <p class="email-message" v-html="email && email.message"></p>
-      <regist-previewer v-if="false" :dataInfo="dataInfo"></regist-previewer>
+      <regist-previewer v-if="notifyType === 'visiting'" :dataInfo="dataInfo"></regist-previewer>
       <!-- 请勿回复提示 -->
       <p class="email-tips">*注意: 此封信由系統發送，請勿回覆此 Email</p>
     </div>
@@ -127,8 +127,7 @@ export default {
               },
             ],
             title: "【女媧接待系統】- %character %name 沒戴口罩通知 %time", //郵件內容標題
-            message:
-              "沒戴口罩通知：\n%time %name%salutation\n%noFaceMask載口罩", //郵件內容正文
+            message: "%time %name%salutation\n%noFaceMask載口罩", //郵件內容正文
             attachment: null, //附件的表格id
           },
           {
@@ -142,7 +141,7 @@ export default {
             ],
             title: "【女媧接待系統】 -  %time %name 體溫正常通知",
             message:
-              "體溫正常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
+              "%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
             attachment: null,
           },
           {
@@ -156,7 +155,7 @@ export default {
             ],
             title: "【女媧接待系統】 -  %time %name 體溫異常通知",
             message:
-              "體溫異常通知：\n%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
+              "%time %name %salutation\n體溫：%temperature°C\n%noFaceMask載口罩",
             attachment: null,
           },
           {
@@ -170,7 +169,7 @@ export default {
               },
             ],
             title: "【女媧接待系統】- %character %name 來訪通知 %time",
-            message: "來訪通知： \n%character %name 來訪，詳細目的如下附件：",
+            message: "%character %name 來訪，詳細目的如下附件：",
             attachments: [
               {
                 notifyType: "stranger",
@@ -214,7 +213,13 @@ export default {
       //   },
     };
   },
+  // filters:{
+
+  // },
   methods: {
+    maskText(val) {
+      return val ? "有" : "沒有";
+    },
     selectChanged() {
       this.email = this.scenario.emails.find(
         (o) => o.notifyType === this.notifyType
@@ -227,6 +232,10 @@ export default {
         temperature: 36.5,
         noFaceMask: true,
       };
+
+      if (this.notifyType === "noMask") {
+        userData.noFaceMask = false;
+      }
 
       this.email.title = this.convertTemplate(this.email.title, userData);
       this.email.message = this.convertTemplate(this.email.message, userData);
@@ -246,10 +255,17 @@ export default {
         text = text.replace(regex, item.value);
       });
 
-      var template = hb.compile(text);
-      return template(userData);
-    },
+      let obj;
 
+      if ("noFaceMask" in userData) {
+        obj = Object.assign({...userData}, {
+          noFaceMask: this.maskText(userData.noFaceMask),
+        });
+      }
+
+      var template = hb.compile(text);
+      return template(obj);
+    },
     replaceText(text) {
       // const variables = emailVariables(this.data.notifyType)
       // variables.forEach(item => {
